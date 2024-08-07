@@ -1,0 +1,10 @@
+selenium
+Appium-Python-Client
+axe-selenium-python
+python-owasp-zap-v2.4
+locust
+behave
+allure-behave
+requests
+pytest
+python-dotenv

@@ -1,0 +1,45 @@
+name: Run Mobile Tests with Appium and Behave
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run_mobile_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install behave appium-python-client allure-behave
+
+      - name: Set up Android SDK
+        run: |
+          sudo apt-get install -y android-sdk
+          export ANDROID_HOME=/usr/lib/android-sdk
+          export PATH=$PATH:$ANDROID_HOME/tools
+          export PATH=$PATH:$ANDROID_HOME/platform-tools
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Run Behave Mobile Tests
+        run: |
+          behave --tags=@mobile --format=allure_behave.formatter:AllureFormatter --outfile=reports/mobile/allure-results/results.xml
+
+      - name: Generate Allure Report
+        run: |
+          allure generate reports/mobile/allure-results -o reports/mobile/allure-report
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobile-test-reports
+          path: reports/mobile/

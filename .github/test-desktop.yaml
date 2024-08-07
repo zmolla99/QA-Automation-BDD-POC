@@ -1,0 +1,36 @@
+name: Run Desktop Tests with Selenium and Behave
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run_desktop_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install behave selenium
+
+      - name: Run Behave Desktop Tests
+        run: |
+          behave --tags=@desktop --format=allure_behave.formatter:AllureFormatter --outfile=reports/desktop/allure-results/results.xml
+
+      - name: Generate Allure Report
+        run: |
+          allure generate reports/desktop/allure-results -o reports/desktop/allure-report
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: desktop-test-reports
+          path: reports/desktop/
